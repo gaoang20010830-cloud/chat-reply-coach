@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="聊天回复教练">
+  <rect width="512" height="512" rx="112" fill="#2f7d73"/>
+  <path d="M137 162c0-38 31-69 69-69h100c38 0 69 31 69 69v71c0 38-31 69-69 69h-57l-71 62c-12 10-30 2-30-14v-54c-28-10-48-37-48-69v-65Z" fill="#fff"/>
+  <path d="M176 174h160" stroke="#2f7d73" stroke-width="26" stroke-linecap="round"/>
+  <path d="M176 224h112" stroke="#2f7d73" stroke-width="26" stroke-linecap="round"/>
+  <path d="M309 324c25 0 45 20 45 45s-20 45-45 45-45-20-45-45 20-45 45-45Z" fill="#ffcf7a"/>
+  <path d="M309 343v52" stroke="#1f2927" stroke-width="18" stroke-linecap="round"/>
+  <path d="M283 369h52" stroke="#1f2927" stroke-width="18" stroke-linecap="round"/>
+</svg>
