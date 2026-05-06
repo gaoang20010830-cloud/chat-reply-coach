@@ -27,8 +27,8 @@ cp .env.example .env
 在 `.env` 中配置：
 
 ```bash
-OPENAI_API_KEY=sk-your-api-key
-OPENAI_MODEL=gpt-4.1-mini
+DEEPSEEK_API_KEY=sk-your-deepseek-api-key
+DEEPSEEK_MODEL=deepseek-v4-flash
 PORT=5173
 ```
 
@@ -77,7 +77,7 @@ Vite 构建产物输出到 `dist`，Vercel 部署时也使用这个目录。
 3. 在一加手机浏览器打开终端输出的手机访问地址，例如 `http://192.168.x.x:5173`。
 4. 粘贴一段聊天消息，选择关系类型、聊天目标和回复风格。
 5. 点击「生成回复建议」。
-6. 如果提示未配置服务端 API Key，请先在 `.env` 中填写 `OPENAI_API_KEY`，然后重启 `npm run dev`。
+6. 如果提示未配置服务端 API Key，请先在 `.env` 中填写 `DEEPSEEK_API_KEY`，然后重启 `npm run dev`。
 7. 生成成功后，测试每条回复旁边的「复制」按钮。
 8. 如果页面体验正常，点击浏览器菜单，选择「添加到主屏幕」或「安装应用」。
 
@@ -89,7 +89,7 @@ Vite 构建产物输出到 `dist`，Vercel 部署时也使用这个目录。
 POST /api/generate
 ```
 
-Vercel 部署时，`api/generate.js` 会作为 serverless function 运行。服务端只从环境变量读取 `OPENAI_API_KEY`，请求模型返回严格 JSON：
+Vercel 部署时，`api/generate.js` 会作为 serverless function 运行。服务端只从环境变量读取 `DEEPSEEK_API_KEY`，通过兼容 OpenAI 格式的 DeepSeek API 请求模型返回严格 JSON：
 
 ```json
 {
@@ -106,12 +106,12 @@ Vercel 部署时，`api/generate.js` 会作为 serverless function 运行。服�
 }
 ```
 
-如果没有配置 `OPENAI_API_KEY`，接口会返回：
+如果没有配置 `DEEPSEEK_API_KEY`，接口会返回：
 
 ```json
 {
-  "error": "missing_openai_api_key",
-  "message": "服务端缺少 OPENAI_API_KEY，请在 Vercel 环境变量中配置后重新部署。"
+  "error": "missing_deepseek_api_key",
+  "message": "服务端缺少 DEEPSEEK_API_KEY，请在 Vercel 环境变量中配置后重新部署。"
 }
 ```
 
@@ -144,8 +144,8 @@ git push -u origin main
 6. 在 Vercel 项目的 Environment Variables 中添加：
 
 ```text
-OPENAI_API_KEY=你的服务端 OpenAI API Key
-OPENAI_MODEL=gpt-4.1-mini
+DEEPSEEK_API_KEY=你的 DeepSeek API Key
+DEEPSEEK_MODEL=deepseek-v4-flash
 ```
 
 7. 点击 Deploy。部署完成后，用 Vercel 给出的 HTTPS 地址打开应用。

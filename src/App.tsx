@@ -229,8 +229,8 @@ function App() {
       });
       setResult(advice);
     } catch (error) {
-      if (error instanceof Error && error.message === "missing_openai_api_key") {
-        setError("还没有配置服务端 API Key，请先在 .env 中填写后再测试生成回复。");
+      if (error instanceof Error && error.message === "missing_deepseek_api_key") {
+        setError("还没有配置 DEEPSEEK_API_KEY，请先在 .env 或 Vercel 环境变量中填写后再测试生成回复。");
       } else {
         setError("生成回复建议失败了，请稍后再试。");
       }

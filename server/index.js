@@ -49,8 +49,8 @@ app.listen(port, host, () => {
   console.log(`本机访问地址：http://localhost:${port}`);
   console.log(`手机访问地址：http://${lanIp || "我的电脑局域网IP"}:${port}`);
 
-  if (!process.env.OPENAI_API_KEY) {
-    console.log("未检测到 OPENAI_API_KEY，请在 .env 中填写后再测试生成回复。");
+  if (!process.env.DEEPSEEK_API_KEY) {
+    console.log("未检测到 DEEPSEEK_API_KEY，请在 .env 中填写后再测试生成回复。");
   }
 });
 

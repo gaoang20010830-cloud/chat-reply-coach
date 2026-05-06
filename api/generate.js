@@ -1,3 +1,5 @@
+import OpenAI from "openai";
+
 const SYSTEM_PROMPT = `你是聊天回复教练，不是代聊工具。
 请帮助用户理解对方消息背后的情绪、关系信号和聊天机会。
 用户平时说话偏理性，容易进入解决问题模式，回复容易显得生硬。
@@ -9,42 +11,20 @@ const SYSTEM_PROMPT = `你是聊天回复教练，不是代聊工具。
 3. 回复要像真实聊天，避免鸡汤、讲道理、长篇分析和油腻称呼。
 4. 如果对方情绪明显低落，优先接住情绪，不急着解决问题。
 5. 如果关系是客户或同事，保持分寸、清晰和尊重。
-6. 只输出结构化 JSON，不要输出 Markdown。`;
-
-const adviceSchema = {
-  type: "object",
-  additionalProperties: false,
-  properties: {
-    emotion_analysis: {
-      type: "string",
-      description: "对对方情绪状态、潜台词、关系信号的简短判断。",
-    },
-    avoid_reply: {
-      type: "string",
-      description: "提醒用户这时候不建议怎么回，指出容易生硬、油腻或失分的说法。",
-    },
-    replies: {
-      type: "object",
-      additionalProperties: false,
-      properties: {
-        natural: { type: "string" },
-        humorous: { type: "string" },
-        warm: { type: "string" },
-        progressive: { type: "string" },
-      },
-      required: ["natural", "humorous", "warm", "progressive"],
-    },
-    best_reply: {
-      type: "string",
-      description: "最推荐用户直接复制发送的一句，尽量自然、短、像真人。",
-    },
-    reason: {
-      type: "string",
-      description: "解释为什么这样回合适，帮助用户学习聊天判断。",
-    },
+6. 只输出 JSON 对象，不要输出 Markdown、代码块或额外解释。
+7. JSON 必须严格使用以下结构和字段名：
+{
+  "emotion_analysis": "对对方情绪状态、潜台词、关系信号的简短判断。",
+  "avoid_reply": "提醒用户这时候不建议怎么回，指出容易生硬、油腻或失分的说法。",
+  "replies": {
+    "natural": "自然版回复。",
+    "humorous": "轻松幽默版回复。",
+    "warm": "温柔关心版回复。",
+    "progressive": "稍微推进关系版回复。"
   },
-  required: ["emotion_analysis", "avoid_reply", "replies", "best_reply", "reason"],
-};
+  "best_reply": "最推荐用户直接复制发送的一句。",
+  "reason": "解释为什么这样回合适，帮助用户学习聊天判断。"
+}`;
 
 export async function nodeHandler(req, res) {
   if (req.method !== "POST") {
@@ -93,12 +73,12 @@ export async function handleGeneratePayload(payload) {
     };
   }
 
-  if (!process.env.OPENAI_API_KEY) {
+  if (!process.env.DEEPSEEK_API_KEY) {
     return {
       status: 500,
       body: {
-        error: "missing_openai_api_key",
-        message: "服务端缺少 OPENAI_API_KEY，请在 Vercel 环境变量中配置后重新部署。",
+        error: "missing_deepseek_api_key",
+        message: "服务端缺少 DEEPSEEK_API_KEY，请在 Vercel 环境变量中配置后重新部署。",
       },
     };
   }
@@ -193,43 +173,29 @@ function safeText(value, maxLength) {
 }
 
 async function createAdvice(input) {
-  const model = process.env.OPENAI_MODEL || "gpt-4.1-mini";
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model,
-      temperature: 0.7,
-      messages: [
-        {
-          role: "system",
-          content: SYSTEM_PROMPT,
-        },
-        {
-          role: "user",
-          content: buildUserPrompt(input),
-        },
-      ],
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "chat_reply_coach_advice",
-          strict: true,
-          schema: adviceSchema,
-        },
-      },
-    }),
+  const client = new OpenAI({
+    baseURL: "https://api.deepseek.com",
+    apiKey: process.env.DEEPSEEK_API_KEY,
   });
 
-  if (!response.ok) {
-    throw new Error(`openai_status_${response.status}`);
-  }
+  const model = process.env.DEEPSEEK_MODEL || "deepseek-v4-flash";
+  const completion = await client.chat.completions.create({
+    model,
+    temperature: 0.7,
+    messages: [
+      {
+        role: "system",
+        content: SYSTEM_PROMPT,
+      },
+      {
+        role: "user",
+        content: buildUserPrompt(input),
+      },
+    ],
+    response_format: { type: "json_object" },
+  });
 
-  const data = await response.json();
-  const content = data?.choices?.[0]?.message?.content;
+  const content = completion.choices?.[0]?.message?.content;
 
   if (typeof content !== "string") {
     throw new Error("empty_model_output");
