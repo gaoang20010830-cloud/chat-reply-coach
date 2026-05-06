@@ -90,7 +90,7 @@ export async function handleGeneratePayload(payload) {
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : "unknown_error";
-    console.error(`AI generation failed: ${message}`);
+    console.error(`AI generation failed: ${redactSecrets(message)}`);
     return {
       status: 502,
       body: {
@@ -178,7 +178,7 @@ async function createAdvice(input) {
     apiKey: process.env.DEEPSEEK_API_KEY,
   });
 
-  const model = process.env.DEEPSEEK_MODEL || "deepseek-v4-flash";
+  const model = getDeepSeekModel();
   const completion = await client.chat.completions.create({
     model,
     temperature: 0.7,
@@ -207,6 +207,20 @@ async function createAdvice(input) {
   }
 
   return parsed;
+}
+
+function getDeepSeekModel() {
+  const configuredModel = process.env.DEEPSEEK_MODEL?.trim();
+
+  if (!configuredModel || configuredModel.startsWith("sk-")) {
+    return "deepseek-v4-flash";
+  }
+
+  return configuredModel;
+}
+
+function redactSecrets(message) {
+  return message.replace(/sk-[A-Za-z0-9_-]+/g, "sk-***");
 }
 
 function buildUserPrompt(input) {
